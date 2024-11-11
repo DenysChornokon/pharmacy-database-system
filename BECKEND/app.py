@@ -183,6 +183,65 @@ def add_drug():
         cursor.close()
         conn.close()
 
+
+# Маршрут для редагування препарату
+@app.route('/edit-drug/<int:drug_id>', methods=['PUT'])
+@jwt_required()
+@role_required("Адміністратор системи")
+def edit_drug(drug_id):
+    data = request.get_json()
+    updates = {
+        "Name": data.get('name'),
+        "Manufacturer_ID": data.get('manufacturer_id'),
+        "Price": data.get('price'),
+        "Total_amount": data.get('quantity'),
+        "Requires_prescription": data.get('requires_prescription')
+    }
+
+    # Видаляємо з `updates` елементи, які мають значення `None`
+    updates = {key: value for key, value in updates.items() if value is not None}
+
+    if not updates:
+        return jsonify({"error": "Не вказано жодного параметра для оновлення"}), 400
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Створення SQL запиту для оновлення динамічно з параметрами
+        set_clause = ", ".join([f"{key} = %s" for key in updates.keys()])
+        sql = f"UPDATE Drug SET {set_clause} WHERE ID = %s"
+
+        cursor.execute(sql, list(updates.values()) + [drug_id])
+        return jsonify({"message": "Препарат успішно оновлено"}), 200
+    except psycopg2.Error as e:
+        return jsonify({"error": "Помилка при оновленні препарату"}), 400
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# Маршрут для видалення препарату
+@app.route('/delete-drug/<int:drug_id>', methods=['DELETE'])
+@jwt_required()
+@role_required("Адміністратор системи")
+def delete_drug(drug_id):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("DELETE FROM Drug WHERE ID = %s", (drug_id,))
+
+        if cursor.rowcount == 0:
+            return jsonify({"error": "Препарат не знайдено"}), 404
+
+        return jsonify({"message": "Препарат успішно видалено"}), 200
+    except psycopg2.Error:
+        return jsonify({"error": "Помилка при видаленні препарату"}), 400
+    finally:
+        cursor.close()
+        conn.close()
+
 # Запуск сервера
 if __name__ == '__main__':
     app.run(debug=True)

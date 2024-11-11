@@ -71,4 +71,7 @@ async function accessProtectedRoute(route) {
   }
 }
 
+// Прив'язка до кнопки входу
+document.getElementById("login-button").addEventListener("click", login);
+
 
