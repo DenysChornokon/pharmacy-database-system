@@ -1,3 +1,4 @@
+-- Active: 1731167437977@@127.0.0.1@5432@pharmacy
 -- //Визначити групу препаратів, яких є найбільше в аптеці
 SELECT
     CASE
@@ -60,3 +61,5 @@ GROUP BY
     c.Full_name
 ORDER BY TotalOrders DESC, TotalSpent DESC
 LIMIT 3;
+
+SELECT * from Drug

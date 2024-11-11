@@ -1,20 +1,29 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Адміністратор - Pharmacy System</title>
-    <link rel="stylesheet" href="./css/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Адміністратор - Pharmacy System</title>
+  <link rel="stylesheet" href="./css/style.css" />
 </head>
 <body>
-    <div class="loged_header_container">
-        <h1>Панель адміністратора</h1>
-        <nav>
-            <button onclick="window.location.href='add_drug.html'">Додати препарат</button>
-            <button onclick="window.location.href='edit_data.html'">Редагувати дані</button>
-            <button onclick="window.location.href='manage_discounts.html'">Управління знижками</button>
-            <button onclick="window.location.href='client_data.html'">Дані про клієнтів</button>
-        </nav>
-    </div>
+  <div class="loged_header_container">
+    <h1>Панель адміністратора</h1>
+    <nav>
+      <button onclick="showAddDrugForm()">Додати препарат</button>
+      <button onclick="showEditDataForm()">Редагувати дані</button>
+      <button onclick="showManageDiscounts()">Управління знижками</button>
+      <button onclick="showClientData()">Дані про клієнтів</button>
+    </nav>
+  </div>
+  
+  <!-- Основна область для контенту -->
+  <div id="content-area" class="content-area"></div>
+
+  <!-- Повідомлення про результат додавання -->
+  <p id="responseMessage"></p>
+
+  <script src="admin.js"></script>
 </body>
 </html>
+

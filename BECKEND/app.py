@@ -61,7 +61,7 @@ def register():
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
-    role_name = data.get('role_name')  # Наприклад, "Адміністратор системи"
+    role_name = data.get('role_name')
 
     if not username or not password or not role_name:
         return jsonify({"error": "Missing data"}), 400
@@ -147,6 +147,41 @@ def pharmacist_page():
 def sales_manager_page():
     return jsonify({"message": "Welcome to the Sales Manager Page"})
 
+
+# Захищений маршрут для додавання препарату
+@app.route('/add-drug', methods=['POST'])
+@jwt_required()
+@role_required("Адміністратор системи")  # Перевірка ролі адміністратора
+def add_drug():
+    data = request.get_json()
+    name = data.get('name')
+    manufacturer_id = data.get('manufacturer_id')
+    price = data.get('price')
+    quantity = data.get('quantity')
+    requires_prescription = data.get('requires_prescription')
+
+    if not all([name, manufacturer_id, price is not None, quantity is not None, requires_prescription is not None]):
+        return jsonify({"error": "Неповні дані"}), 400
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+        # Додавання препарату в базу даних
+        cursor.execute(
+            '''
+            INSERT INTO Drug (Name, Manufacturer_ID, Price, Total_amount, Requires_prescription)
+            VALUES (%s, %s, %s, %s, %s)
+            ''',
+            (name, manufacturer_id, price, quantity, requires_prescription)
+        )
+
+        return jsonify({"message": "Препарат успішно додано"}), 201
+    except psycopg2.IntegrityError:
+        return jsonify({"error": "Назва препарату вже існує"}), 400
+    finally:
+        cursor.close()
+        conn.close()
 
 # Запуск сервера
 if __name__ == '__main__':

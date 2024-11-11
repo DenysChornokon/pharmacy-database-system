@@ -1,3 +1,5 @@
+//! --------------------------------------------------------------------------Додати функцію реєстрації! ------------------------------------------------------------------------
+
 // Функція для входу
 async function login() {
   const username = document.getElementById("username").value;
@@ -14,13 +16,13 @@ async function login() {
     const response = await fetch("http://127.0.0.1:5000/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password, selectedRole }), // Додаємо вибрану роль
+      body: JSON.stringify({ username, password, selectedRole }), // Надсилаємо вибрану роль
     });
 
     const data = await response.json();
 
     if (response.ok) {
-      localStorage.setItem("access_token", data.access_token);
+      localStorage.setItem("access_token", data.access_token); // Зберігаємо токен
 
       // Перевірка ролі та перенаправлення на відповідну сторінку
       if (data.role === "Адміністратор системи") {
@@ -36,7 +38,8 @@ async function login() {
       alert(data.error || "Авторизація не вдалася");
     }
   } catch (error) {
-    console.error("Error during login:", error);
+    console.error("Помилка під час авторизації:", error);
+    alert("Помилка під час авторизації, спробуйте знову.");
   }
 }
 
@@ -63,10 +66,9 @@ async function accessProtectedRoute(route) {
       alert(data.error || "Доступ заборонено");
     }
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Помилка доступу до захищеного маршруту:", error);
     alert("Помилка з'єднання із сервером");
   }
 }
 
-// Прив'язка до кнопки входу
-document.getElementById("login-button").addEventListener("click", login);
+
