@@ -3,9 +3,9 @@ async function login() {
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
   const roleElement = document.getElementById("role");
-  const role = roleElement.options[roleElement.selectedIndex].text;
+  const selectedRole = roleElement.options[roleElement.selectedIndex].text;
 
-  if (!username || !password || !role) {
+  if (!username || !password || !selectedRole) {
     alert("Всі поля повинні бути заповнені!");
     return;
   }
@@ -14,16 +14,15 @@ async function login() {
     const response = await fetch("http://127.0.0.1:5000/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ username, password, selectedRole }), // Додаємо вибрану роль
     });
 
     const data = await response.json();
 
     if (response.ok) {
-      // Зберігаємо токен у локальному сховищі браузера
       localStorage.setItem("access_token", data.access_token);
 
-      // Перевіряємо роль користувача та перенаправляємо на відповідну сторінку
+      // Перевірка ролі та перенаправлення на відповідну сторінку
       if (data.role === "Адміністратор системи") {
         window.location.href = "admin.html";
       } else if (data.role === "Фармацевт") {
@@ -38,7 +37,6 @@ async function login() {
     }
   } catch (error) {
     console.error("Error during login:", error);
-    alert("Помилка з'єднання із сервером");
   }
 }
 

@@ -93,15 +93,17 @@ def register():
 
     return jsonify({"message": "User registered successfully"}), 201
 
+
 # Маршрут для входу користувача
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
+    selected_role = data.get('selectedRole')  # Отримуємо вибрану роль з запиту
 
-    if not username or not password:
-        return jsonify({"error": "Missing username or password"}), 400
+    if not username or not password or not selected_role:
+        return jsonify({"error": "Missing username, password, or role"}), 400
 
     conn = get_db_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -113,11 +115,19 @@ def login():
     conn.close()
 
     if user and bcrypt.checkpw(password.encode('utf-8'), user['password_hash'].encode('utf-8')):
+        # Виведення значень ролей для діагностики
+        print(f"Роль з бази даних: {user['role_name']}, Вибрана роль: {selected_role}")
+
+        # Перевірка з нормалізацією тексту
+        if user["role_name"].strip().lower() != selected_role.strip().lower():
+            return jsonify({"error": "Selected role does not match user role"}), 403
+
         # Створення JWT токена з ідентифікацією користувача
         access_token = create_access_token(identity={"username": user["username"], "role": user["role_name"]})
-        return jsonify({"message": "Login successful", "access_token": access_token, "role": user["role_name"]})  # Передаємо роль у відповіді
+        return jsonify({"message": "Login successful", "access_token": access_token, "role": user["role_name"]})
     else:
         return jsonify({"error": "Invalid username or password"}), 401
+
 
 # Захищений маршрут для адміністратора
 @app.route('/admin', methods=['GET'], endpoint='admin_page')
@@ -136,6 +146,7 @@ def pharmacist_page():
 @role_required("Менеджер з продажу")
 def sales_manager_page():
     return jsonify({"message": "Welcome to the Sales Manager Page"})
+
 
 # Запуск сервера
 if __name__ == '__main__':
