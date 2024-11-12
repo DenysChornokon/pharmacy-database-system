@@ -147,6 +147,38 @@ def pharmacist_page():
 def sales_manager_page():
     return jsonify({"message": "Welcome to the Sales Manager Page"})
 
+# Маршрут для перегляду препаратів
+@app.route("/view-drugs", methods=["GET"])
+@jwt_required()
+def view_drugs():
+    try:
+        # Виконуємо SQL-запит для отримання даних про всі препарати
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT ID, Name, Price, Total_amount, Manufacturer_ID, Requires_prescription
+            FROM Drug
+        """)
+
+        # Отримуємо результат у вигляді списку словників
+        drugs = [
+            {
+                "id": row[0],
+                "name": row[1],
+                "price": float(row[2]),
+                "quantity": row[3],
+                "manufacturer_id": row[4],
+                "requires_prescription": row[5]
+            }
+            for row in cursor.fetchall()
+        ]
+
+        cursor.close()
+        return jsonify(drugs), 200
+
+    except Exception as e:
+        print("Error fetching drugs:", e)
+        return jsonify({"error": "Не вдалося завантажити дані про препарати"}), 500
 
 # Захищений маршрут для додавання препарату
 @app.route('/add-drug', methods=['POST'])
@@ -213,6 +245,11 @@ def edit_drug(drug_id):
         sql = f"UPDATE Drug SET {set_clause} WHERE ID = %s"
 
         cursor.execute(sql, list(updates.values()) + [drug_id])
+
+        # Перевіряємо, чи було видалено хоча б один рядок
+        if cursor.rowcount == 0:
+            return jsonify({"error": "Препарата з таким ID не існує"}), 404
+        
         return jsonify({"message": "Препарат успішно оновлено"}), 200
     except psycopg2.Error as e:
         return jsonify({"error": "Помилка при оновленні препарату"}), 400
@@ -231,6 +268,12 @@ def delete_drug(drug_id):
         cursor = conn.cursor()
 
         cursor.execute("DELETE FROM Drug WHERE ID = %s", (drug_id,))
+
+        # Перевіряємо, чи було видалено хоча б один рядок
+        if cursor.rowcount == 0:
+            return jsonify({"error": "Препарата з таким ID не існує"}), 404
+
+        cursor.execute("SELECT setval('Drug_ID_seq', (SELECT MAX(ID) FROM Drug))")
 
         if cursor.rowcount == 0:
             return jsonify({"error": "Препарат не знайдено"}), 404

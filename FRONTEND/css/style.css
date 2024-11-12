@@ -98,7 +98,7 @@ nav button:disabled {
     cursor: not-allowed;
 }
 
-.loged_header_container {
+/* .loged_header_container {
     background-color: #1e1e1e; 
     color: #ffffff; 
     display: flex;
@@ -108,10 +108,10 @@ nav button:disabled {
 
 .loged_header_container h1{
     margin: 0;
-}
+} */
 
 /* Форма та поля на додаткових сторінках */
-form {
+/* form {
     background-color: #2e2e2e;
     padding: 20px;
     border-radius: 8px;
@@ -132,7 +132,7 @@ form input, form select {
 form button {
     background-color: #ffcc00;
     color: #1e1e1e;
-}
+} */
 
 /* Для малих екранів */
 @media (max-width: 600px) {

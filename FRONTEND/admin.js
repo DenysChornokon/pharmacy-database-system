@@ -2,27 +2,28 @@
 function showAddDrugForm() {
   const contentArea = document.getElementById("content-area");
   contentArea.innerHTML = `
-    <h2>Додати препарат</h2>
-    <form id="add-drug-form">
+    <h2 class="form-title">Додати препарат</h2>
+    <form id="add-drug-form" class="drug-form">
       <label for="drug-name">Назва препарату:</label>
-      <input type="text" id="drug-name" name="drug-name" required>
+      <input type="text" id="drug-name" class="form-input" name="drug-name" required>
 
       <label for="manufacturer-id">ID Виробника:</label>
-      <input type="number" id="manufacturer-id" name="manufacturer-id" required>
+      <input type="number" id="manufacturer-id" class="form-input" name="manufacturer-id" required>
 
       <label for="price">Ціна:</label>
-      <input type="number" id="price" name="price" step="0.01" required>
+      <input type="number" id="price" class="form-input" name="price" step="0.01" required>
 
       <label for="quantity">Кількість:</label>
-      <input type="number" id="quantity" name="quantity" required>
+      <input type="number" id="quantity" class="form-input" name="quantity" required>
 
       <label for="requires-prescription">Потребує рецепт:</label>
-      <select id="requires-prescription" name="requires-prescription" required>
+      <select id="requires-prescription" class="form-input" name="requires-prescription" required>
         <option value="true">Так</option>
         <option value="false">Ні</option>
       </select>
 
-      <button type="button" onclick="addDrug()">Додати</button>
+      <button type="button" class="submit-button" onclick="addDrug()">Додати</button>
+      <p class="responseMessage"></p>
     </form>
     <p id="responseMessage"></p>
   `;
@@ -58,13 +59,13 @@ async function addDrug() {
     });
 
     const result = await response.json();
-    document.getElementById("responseMessage").textContent = response.ok
+    document.querySelector(".responseMessage").textContent = response.ok
       ? result.message
       : result.error;
     document.getElementById("add-drug-form").reset();
   } catch (error) {
     console.error("Error:", error);
-    document.getElementById("responseMessage").textContent =
+    document.querySelector(".responseMessage").textContent =
       "Помилка при додаванні препарату.";
   }
 }
@@ -73,33 +74,33 @@ async function addDrug() {
 function showEditDrugForm() {
   const contentArea = document.getElementById("content-area");
   contentArea.innerHTML = `
-    <h2>Редагувати препарат</h2>
-    <form id="edit-drug-form">
+    <h2 class="form-title">Редагувати препарат</h2>
+    <form id="edit-drug-form" class="drug-form">
       <label for="drug-id">ID препарату:</label>
-      <input type="number" id="drug-id" name="drug-id" required>
+      <input type="number" id="drug-id" class="form-input" name="drug-id" required>
 
       <label for="drug-name">Нова назва препарату:</label>
-      <input type="text" id="drug-name" name="drug-name">
+      <input type="text" id="drug-name" class="form-input" name="drug-name">
 
       <label for="manufacturer-id">Новий ID Виробника:</label>
-      <input type="number" id="manufacturer-id" name="manufacturer-id">
+      <input type="number" id="manufacturer-id" class="form-input" name="manufacturer-id">
 
       <label for="price">Нова ціна:</label>
-      <input type="number" id="price" name="price" step="0.01">
+      <input type="number" id="price" class="form-input" name="price" step="0.01">
 
       <label for="quantity">Нова кількість:</label>
-      <input type="number" id="quantity" name="quantity">
+      <input type="number" id="quantity" class="form-input" name="quantity">
 
       <label for="requires-prescription">Потребує рецепт:</label>
-      <select id="requires-prescription" name="requires-prescription">
+      <select id="requires-prescription" class="form-input" name="requires-prescription">
         <option value="">Не змінювати</option>
         <option value="true">Так</option>
         <option value="false">Ні</option>
       </select>
 
-      <button type="button" onclick="editDrug()">Змінити</button>
+      <button type="button" class="submit-button" onclick="editDrug()">Змінити</button>
     </form>
-    <p id="responseMessage"></p>
+    <p class="responseMessage"></p>
   `;
 }
 
@@ -136,12 +137,12 @@ async function editDrug() {
     });
 
     const result = await response.json();
-    document.getElementById("responseMessage").textContent = response.ok
+    document.querySelector(".responseMessage").textContent = response.ok
       ? result.message
       : result.error;
   } catch (error) {
     console.error("Error:", error);
-    document.getElementById("responseMessage").textContent =
+    document.querySelector(".responseMessage").textContent =
       "Помилка при редагуванні препарату.";
   }
 }
@@ -150,13 +151,13 @@ async function editDrug() {
 function showDeleteDrugForm() {
   const contentArea = document.getElementById("content-area");
   contentArea.innerHTML = `
-    <h2>Видалити препарат</h2>
-    <form id="delete-drug-form">
+    <h2 class="form-title">Видалити препарат</h2>
+    <form id="delete-drug-form" class="drug-form">
       <label for="drug-id">ID препарату:</label>
-      <input type="number" id="drug-id" name="drug-id" required>
-      <button type="button" onclick="deleteDrug()">Видалити</button>
+      <input type="number" id="drug-id" class="form-input" name="drug-id" required>
+      <button type="button" class="submit-button" onclick="deleteDrug()">Видалити</button>
     </form>
-    <p id="responseMessage"></p>
+    <p class="responseMessage"></p>
   `;
 }
 
@@ -177,12 +178,60 @@ async function deleteDrug() {
     );
 
     const result = await response.json();
-    document.getElementById("responseMessage").textContent = response.ok
+    document.querySelector(".responseMessage").textContent = response.ok
       ? result.message
       : result.error;
   } catch (error) {
     console.error("Error:", error);
-    document.getElementById("responseMessage").textContent =
+    document.querySelector(".responseMessage").textContent =
       "Помилка при видаленні препарату.";
   }
 }
+
+
+// Розширена функція для перегляду всіх препаратів
+async function viewDrugs() {
+  const token = localStorage.getItem("access_token");
+
+  try {
+    const response = await fetch("http://127.0.0.1:5000/view-drugs", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    // Перевіряємо, чи успішна відповідь
+    if (!response.ok) {
+      throw new Error(`Помилка: ${response.status} ${response.statusText}`);
+    }
+
+    const drugs = await response.json();
+
+    // Перевірка на те, що `drugs` є масивом
+    if (!Array.isArray(drugs)) {
+      throw new Error("Невірний формат даних: очікується масив");
+    }
+
+    const drugList = document.getElementById("drug-list");
+    drugList.innerHTML = ""; // Очищаємо список перед додаванням нових препаратів
+
+    drugs.forEach((drug) => {
+      const drugItem = document.createElement("div");
+      drugItem.className = "drug-item";
+      drugItem.innerHTML = `
+        <h3>${drug.id}. ${drug.name}</h3>
+        <p><strong>Ціна:</strong> ${drug.price} грн</p>
+        <p><strong>Кількість:</strong> ${drug.quantity}</p>
+        <p><strong>ID Виробника:</strong> ${drug.manufacturer_id}</p>
+        <p><strong>Потребує рецепт:</strong> ${
+          drug.requires_prescription ? "Так" : "Ні"
+        }</p>
+      `;
+      drugList.appendChild(drugItem);
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    alert("Помилка при завантаженні списку препаратів: " + error.message);
+  }
+}
+
