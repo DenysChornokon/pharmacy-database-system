@@ -3,17 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Фармацевт - Pharmacy System</title>
-    <link rel="stylesheet" href="./css/style.css">
+    <title>Панель фармацевта</title>
+    <link rel="stylesheet" href="./css/pharmacist.css">
 </head>
 <body>
-    <div class="loged_header_container">
+    <header class="header">
         <h1>Панель фармацевта</h1>
-        <nav>
-            <button onclick="window.location.href='create_order.html'">Створити замовлення</button>
-            <button onclick="window.location.href='apply_discount.html'">Застосувати знижку</button>
-            <button onclick="window.location.href='check_stock.html'">Перевірити наявність препаратів</button>
-        </nav>
+    </header>
+
+    <div class="container">
+        <!-- Ліва секція з кнопками для перегляду даних -->
+        <aside class="sidebar">
+            <div class="pharm-buttons-container">
+                <button onclick="viewClients()" class="view-button" id="view-clients-button">Вивести список клієнтів</button>
+                <button onclick="viewDrugs()" class="view-button" id="view-drugs-button">Вивести список препаратів</button>
+            </div>
+            <div id="list-container" class="drug-list list-container">
+                <!-- Тут виводитимуться списки клієнтів або препаратів -->
+            </div>
+        </aside>
+
+        <!-- Права секція для форми продажу -->
+        <main class="main-content">
+            <h2>Продаж препарату</h2>
+            <form id="sell-drug-form" class="form-container">
+                <label for="client-id">ID Клієнта:</label>
+                <input type="number" id="client-id" class="form-input" required>
+
+                <label for="drug-id">ID Препарату:</label>
+                <input type="number" id="drug-id" class="form-input" required>
+
+                <label for="quantity">Кількість:</label>
+                <input type="number" id="quantity" class="form-input" required>
+
+                <label for="prescription-id">ID Рецепта (якщо потрібен):</label>
+                <input type="number" id="prescription-id" class="form-input">
+
+                <button type="submit" class="submit-button">Продати</button>
+            </form>
+
+            <!-- Поле для відображення інформації про замовлення -->
+            <div id="order-summary" class="order-summary">
+                <h3>Інформація про замовлення</h3>
+                <p id="order-summary-text">Підтвердження продажу з’явиться тут після введення даних</p>
+            </div>
+        </main>
     </div>
+
+    <script src="pharmacist.js"></script>
 </body>
 </html>

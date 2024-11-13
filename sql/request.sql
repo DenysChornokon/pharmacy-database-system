@@ -62,4 +62,4 @@ GROUP BY
 ORDER BY TotalOrders DESC, TotalSpent DESC
 LIMIT 3;
 
-SELECT id from Drug
+SELECT * from Client

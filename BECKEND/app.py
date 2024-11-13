@@ -180,6 +180,40 @@ def view_drugs():
         print("Error fetching drugs:", e)
         return jsonify({"error": "Не вдалося завантажити дані про препарати"}), 500
 
+
+# Маршрут для перегляду клієнтів
+@app.route("/view-clients", methods=["GET"])
+@jwt_required()
+def view_clients():
+    try:
+        # Виконуємо SQL-запит для отримання даних про всіх клієнтів
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT ID, Full_name, Passport_series, Passport_number, Client_address
+            FROM Client
+        """)
+
+        # Отримуємо результат у вигляді списку словників
+        clients = [
+            {
+                "id": row[0],
+                "full_name": row[1],
+                "passport_series": row[2],
+                "passport_number": row[3],
+                "address": row[4]
+            }
+            for row in cursor.fetchall()
+        ]
+
+        cursor.close()
+        return jsonify(clients), 200
+
+    except Exception as e:
+        print("Error fetching clients:", e)
+        return jsonify({"error": "Не вдалося завантажити дані про клієнтів"}), 500
+
+
 # Захищений маршрут для додавання препарату
 @app.route('/add-drug', methods=['POST'])
 @jwt_required()
@@ -330,6 +364,9 @@ def get_client_orders(client_id):
     except Exception as e:
         print("Error retrieving client orders:", e)
         return jsonify({"error": "Не вдалося отримати історію замовлень"}), 500
+
+
+
 
 # Запуск сервера
 if __name__ == '__main__':
