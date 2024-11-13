@@ -285,6 +285,52 @@ def delete_drug(drug_id):
         cursor.close()
         conn.close()
 
+# Маршрут для перегляду історії замовлень
+@app.route("/client-orders/<int:client_id>", methods=["GET"])
+@jwt_required()
+def get_client_orders(client_id):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Перевіряємо, чи існує клієнт з таким ID
+        cursor.execute("SELECT * FROM Client WHERE ID = %s", (client_id,))
+        client = cursor.fetchone()
+        if not client:
+            return jsonify({"error": "Клієнта з таким ID не існує"}), 404
+
+        # Отримуємо історію замовлень для клієнта
+        cursor.execute("""
+            SELECT o.ID as order_id, o.Order_date as date, o.Total_cost as total_cost,
+                   d.Name as drug_name, od.Quantity as quantity, od.Total_price as total_price
+            FROM "Order" o
+            LEFT JOIN Order_Drug od ON o.ID = od.Order_ID
+            LEFT JOIN Drug d ON od.Drug_ID = d.ID
+            WHERE o.Client_ID = %s
+            ORDER BY o.Order_date DESC
+        """, (client_id,))
+
+        orders = cursor.fetchall()
+
+        # Форматуємо дані для відправлення в JSON
+        order_history = []
+        for order in orders:
+            order_history.append({
+                "order_id": order[0],
+                "date": order[1].strftime("%Y-%m-%d"),
+                "total_cost": order[2],
+                "drug_name": order[3],
+                "quantity": order[4],
+                "total_price": order[5]
+            })
+
+        cursor.close()
+        conn.close()
+        return jsonify(order_history), 200
+    except Exception as e:
+        print("Error retrieving client orders:", e)
+        return jsonify({"error": "Не вдалося отримати історію замовлень"}), 500
+
 # Запуск сервера
 if __name__ == '__main__':
     app.run(debug=True)

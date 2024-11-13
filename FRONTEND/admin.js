@@ -188,7 +188,6 @@ async function deleteDrug() {
   }
 }
 
-
 // Розширена функція для перегляду всіх препаратів
 async function viewDrugs() {
   const token = localStorage.getItem("access_token");
@@ -235,3 +234,74 @@ async function viewDrugs() {
   }
 }
 
+// Функція для відображення форми перегляду історії замовлень
+// Функція для відображення форми перегляду історії замовлень
+function showClientData() {
+  const contentArea = document.getElementById("content-area");
+  contentArea.innerHTML = `
+    <h2 class="form-title">Перегляд історії замовлень клієнта</h2>
+    <form id="view-client-orders-form" class="client-form">
+      <label for="client-id">ID Клієнта:</label>
+      <input type="number" id="client-id" class="form-input" required>
+      <button type="submit" class="submit-button">Показати історію замовлень</button>
+    </form>
+
+    <div id="order-history" class="order-history"></div>
+  `;
+
+  // Додаємо слухач подій для форми після її створення
+  document
+    .getElementById("view-client-orders-form")
+    .addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const clientId = document.getElementById("client-id").value;
+      const token = localStorage.getItem("access_token");
+
+      try {
+        const response = await fetch(
+          `http://127.0.0.1:5000/client-orders/${clientId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            alert("Клієнта з таким ID не існує.");
+          } else {
+            alert("Помилка сервера.");
+          }
+          return;
+        }
+
+        const orders = await response.json();
+
+        // Перевіряємо, чи є `orders` масивом
+        if (!Array.isArray(orders)) {
+          throw new Error("Невірний формат даних: очікується масив");
+        }
+
+        const orderHistoryDiv = document.getElementById("order-history");
+        orderHistoryDiv.innerHTML = ""; // Очищаємо перед додаванням нових даних
+
+        orders.forEach((order) => {
+          const orderItem = document.createElement("div");
+          orderItem.className = "order-item";
+          orderItem.innerHTML = `
+            <h3>Номер замовлення: ${order.order_id}</h3>
+            <p><strong>Дата замовлення:</strong> ${order.date}</p>
+            <p><strong>Препарат:</strong> ${order.drug_name}</p>
+            <p><strong>Кількість:</strong> ${order.quantity}</p>
+            <p><strong>Загальна вартість:</strong> ${order.total_price} грн</p>
+          `;
+          orderHistoryDiv.appendChild(orderItem);
+        });
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Помилка при завантаженні історії замовлень клієнта.");
+      }
+    });
+}
