@@ -1,4 +1,4 @@
--- Active: 1731063461715@@127.0.0.1@5432@pharmacy
+-- Active: 1731167437977@@127.0.0.1@5432@pharmacy
 
 -- Створення таблиці клієнтів
 CREATE TABLE Client (
@@ -624,3 +624,30 @@ VALUES
         false,
         1
     );
+
+
+    INSERT INTO
+    Prescription (
+        Issue_date,
+        Expiry_date,
+        Client_ID,
+        Drug_ID
+    )
+VALUES (
+        '2023-04-01',
+        '2025-10-01',
+        1,
+        3
+    ),
+    (
+        '2023-05-05',
+        '2025-11-05',
+        2,
+        5
+    ),
+    (
+        '2023-06-15',
+        '2025-12-15',
+        3,
+        7
+    )

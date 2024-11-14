@@ -373,7 +373,7 @@ def sell_drug():
         client_id = data.get("client_id")
         drug_id = data.get("drug_id")
         quantity = data.get("quantity")
-        prescription_id = data.get("prescription_id") or None  # Може бути None
+        prescription_id = data.get("prescription_id") or None
 
         if not client_id or not drug_id or not quantity:
             return jsonify({"error": "Відсутні необхідні дані"}), 400
@@ -397,7 +397,23 @@ def sell_drug():
         if drug["total_amount"] < quantity:
             return jsonify({"error": "Недостатньо препарату на складі"}), 400
 
-        # 2. Створення замовлення
+        # 2. Перевірка на рецепт, якщо він потрібен
+        if drug["requires_prescription"]:
+            if not prescription_id:
+                return jsonify({"error": "Для цього препарату потрібен рецепт"}), 400
+
+            # Перевірка, чи існує рецепт для зазначеного клієнта та препарату
+            cursor.execute("""
+                    SELECT ID 
+                    FROM Prescription 
+                    WHERE ID = %s AND Client_ID = %s AND Drug_ID = %s AND Expiry_date >= CURRENT_DATE
+                """, (prescription_id, client_id, drug_id))
+            valid_prescription = cursor.fetchone()
+
+            if not valid_prescription:
+                return jsonify({"error": "Неприпустимий рецепт для цього клієнта або препарату"}), 400
+
+        # 3. Створення замовлення
         cursor.execute("""
             INSERT INTO "Order" (Order_date, Total_cost, Client_ID, Prescription_ID) 
             VALUES (CURRENT_DATE, 0, %s, %s) 
@@ -410,21 +426,14 @@ def sell_drug():
 
         order_id = order["id"]
 
-        # 3. Додавання препарату до замовлення
+        # 4. Додавання препарату до замовлення
         total_price = round(drug["price"] * quantity, 2)
         cursor.execute("""
             INSERT INTO Order_Drug (Order_ID, Drug_ID, Quantity, Total_price)
             VALUES (%s, %s, %s, %s)
         """, (order_id, drug_id, quantity, total_price))
 
-        # 4. Оновлення кількості препарату
-        cursor.execute("""
-            UPDATE Drug 
-            SET Total_amount = Total_amount - %s 
-            WHERE ID = %s
-        """, (quantity, drug_id))
-
-        # 5. Оновлення загальної вартості замовлення
+        # 6. Оновлення загальної вартості замовлення
         cursor.execute("""
             UPDATE "Order" 
             SET Total_cost = %s 

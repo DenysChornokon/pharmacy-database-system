@@ -66,4 +66,5 @@ SELECT * from Client
 
 SELECT * from "Order"
 
-SELECT * from Client
+SELECT * from Prescription
+
