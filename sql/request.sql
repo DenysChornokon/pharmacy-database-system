@@ -63,3 +63,7 @@ ORDER BY TotalOrders DESC, TotalSpent DESC
 LIMIT 3;
 
 SELECT * from Client
+
+SELECT * from "Order"
+
+SELECT * from Client

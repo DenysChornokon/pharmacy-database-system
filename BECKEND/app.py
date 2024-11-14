@@ -157,7 +157,7 @@ def view_drugs():
         cursor = conn.cursor()
         cursor.execute("""
             SELECT ID, Name, Price, Total_amount, Manufacturer_ID, Requires_prescription
-            FROM Drug
+            FROM Drug ORDER BY id
         """)
 
         # Отримуємо результат у вигляді списку словників
@@ -365,7 +365,81 @@ def get_client_orders(client_id):
         print("Error retrieving client orders:", e)
         return jsonify({"error": "Не вдалося отримати історію замовлень"}), 500
 
+@app.route("/sell-drug", methods=["POST"])
+@jwt_required()
+def sell_drug():
+    try:
+        data = request.get_json()
+        client_id = data.get("client_id")
+        drug_id = data.get("drug_id")
+        quantity = data.get("quantity")
+        prescription_id = data.get("prescription_id") or None  # Може бути None
 
+        if not client_id or not drug_id or not quantity:
+            return jsonify({"error": "Відсутні необхідні дані"}), 400
+
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+        # 1. Перевірка наявності препарату
+        cursor.execute("""
+            SELECT ID, Name, Price, Total_amount, Requires_prescription 
+            FROM Drug 
+            WHERE ID = %s
+        """, (drug_id,))
+        drug = cursor.fetchone()
+
+        print("Дані про препарат:", drug)
+
+        if not drug:
+            return jsonify({"error": "Препарат не знайдено"}), 404
+
+        if drug["total_amount"] < quantity:
+            return jsonify({"error": "Недостатньо препарату на складі"}), 400
+
+        # 2. Створення замовлення
+        cursor.execute("""
+            INSERT INTO "Order" (Order_date, Total_cost, Client_ID, Prescription_ID) 
+            VALUES (CURRENT_DATE, 0, %s, %s) 
+            RETURNING ID
+        """, (client_id, prescription_id))
+        order = cursor.fetchone()
+
+        if not order:
+            return jsonify({"error": "Не вдалося створити замовлення"}), 500
+
+        order_id = order["id"]
+
+        # 3. Додавання препарату до замовлення
+        total_price = round(drug["price"] * quantity, 2)
+        cursor.execute("""
+            INSERT INTO Order_Drug (Order_ID, Drug_ID, Quantity, Total_price)
+            VALUES (%s, %s, %s, %s)
+        """, (order_id, drug_id, quantity, total_price))
+
+        # 4. Оновлення кількості препарату
+        cursor.execute("""
+            UPDATE Drug 
+            SET Total_amount = Total_amount - %s 
+            WHERE ID = %s
+        """, (quantity, drug_id))
+
+        # 5. Оновлення загальної вартості замовлення
+        cursor.execute("""
+            UPDATE "Order" 
+            SET Total_cost = %s 
+            WHERE ID = %s
+        """, (total_price, order_id))
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return jsonify({"message": "Продаж завершено", "order_id": order_id}), 200
+
+    except Exception as e:
+        print("Error processing sale:", e)
+        return jsonify({"error": "Не вдалося завершити продаж"}), 500
 
 
 # Запуск сервера

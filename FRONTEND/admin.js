@@ -212,7 +212,7 @@ async function viewDrugs() {
     }
 
     const drugList = document.getElementById("drug-list");
-    drugList.innerHTML = ""; // Очищаємо список перед додаванням нових препаратів
+    drugList.innerHTML = ""; // Очищення контейнера
 
     drugs.forEach((drug) => {
       const drugItem = document.createElement("div");
