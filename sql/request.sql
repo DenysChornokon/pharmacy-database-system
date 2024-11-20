@@ -66,5 +66,6 @@ SELECT * from Client
 
 SELECT * from "Order"
 
-SELECT * from Prescription
+SELECT * from discount
 
+select * from prescription where client_id = 5

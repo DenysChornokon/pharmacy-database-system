@@ -463,11 +463,7 @@ INSERT INTO
         Discount_percent
     )
 VALUES ('Щасливе число', 10.00),
-    (
-        'Для постійних клієнтів',
-        15.00
-    ),
-    ('На великі замовлення', 12.50);
+    ('На великі замовлення', 15.00);
 
 INSERT INTO
     "Order" (
@@ -651,3 +647,21 @@ VALUES (
         3,
         7
     )
+
+
+
+    INSERT INTO
+    Client (
+        Full_name,
+        Passport_series,
+        Passport_number,
+        Client_address
+    )
+VALUES (
+        'Semen Znyjka',
+        'AA',
+        '200971',
+        'Kyiv, Shevchenko str, 10'
+    )
+
+SELECT * from "Order"
