@@ -658,9 +658,9 @@ VALUES (
         Client_address
     )
 VALUES (
-        'Semen Znyjka',
+        'Natasha Znyjka',
         'AA',
-        '200971',
+        '250971',
         'Kyiv, Shevchenko str, 10'
     )
 

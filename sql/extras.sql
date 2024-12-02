@@ -48,18 +48,7 @@ INSERT
     ON Order_Drug FOR EACH ROW
 EXECUTE FUNCTION check_and_update_drug_stock ();
 
-
-
-
-
-
-
-
-
-
-
-
-
+-- ------------------------------------------------------------------------------------------
 
 DROP TRIGGER IF EXISTS trigger_apply_discount ON Order_Drug;
 
@@ -70,31 +59,28 @@ DROP FUNCTION IF EXISTS apply_discount ();
 CREATE OR REPLACE FUNCTION apply_discount()
 RETURNS TRIGGER AS $$
 DECLARE
-    full_passport_number TEXT;      -- Змінна для об'єднаного номера паспорта
-    order_date_day TEXT;            -- День дати замовлення
-    discount_percent DECIMAL(5, 2); -- Відсоток знижки
-    original_cost DECIMAL(10, 2);   -- Початкова вартість замовлення
-    final_cost DECIMAL(10, 2);      -- Вартість зі знижкою
-    quantity_discount DECIMAL(5, 2); -- Знижка за кількість
-    total_quantity INT;             -- Загальна кількість товарів у замовленні
-    applied_discount_id INT;        -- ID застосованої знижки
+    full_passport_number TEXT;      
+    order_date_day TEXT;            
+    discount_percent DECIMAL(5, 2); 
+    original_cost DECIMAL(10, 2);   
+    final_cost DECIMAL(10, 2);      
+    quantity_discount DECIMAL(5, 2); 
+    total_quantity INT;             
+    applied_discount_id INT;        
 BEGIN
-    -- Витягуємо повний номер паспорта клієнта
+
     SELECT Client.Passport_series || Client.Passport_number
     INTO full_passport_number
     FROM Client
     WHERE Client.ID = NEW.Client_ID;
 
-    -- Витягуємо день із дати замовлення
     order_date_day := TO_CHAR(NEW.Order_date, 'DD');
 
-    -- Початкове значення вартості
     original_cost := NEW.Total_cost;
 
-    -- Ініціалізація знижок
     discount_percent := 0;
     quantity_discount := 0;
-    applied_discount_id := NULL; -- Початково знижка не застосована
+    applied_discount_id := NULL;
 
     -- Знижка за "щасливе число"
     IF position(order_date_day IN full_passport_number) > 0 THEN
@@ -110,14 +96,13 @@ BEGIN
     FROM Order_Drug
     WHERE Order_Drug.Order_ID = NEW.ID;
 
-    -- Знижка за кількість більше 15
+    -- Знижка більше 15
     IF total_quantity > 15 THEN
         SELECT Discount.ID, Discount.Discount_percent
         INTO applied_discount_id, quantity_discount
         FROM Discount
         WHERE Discount.Discount_name = 'На великі замовлення';
 
-        -- Обираємо більший відсоток знижки
         IF quantity_discount > discount_percent THEN
             discount_percent := quantity_discount;
         END IF;
@@ -127,14 +112,11 @@ BEGIN
     IF discount_percent > 0 THEN
         final_cost := original_cost - (original_cost * discount_percent / 100);
 
-        -- Виводимо повідомлення для перевірки
-        RAISE NOTICE 'Discount applied: %, Final Cost: %', discount_percent, final_cost;
     ELSE
         -- Якщо знижки не застосовуються
         final_cost := original_cost;
     END IF;
 
-    -- Оновлюємо значення Total_cost і discount_id
     NEW.Total_cost := final_cost;
     NEW.Discount_ID := applied_discount_id;
 
@@ -142,7 +124,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Оновлений тригер
 CREATE
 OR REPLACE TRIGGER apply_discount_trigger BEFORE INSERT
 OR
