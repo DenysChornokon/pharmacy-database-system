@@ -665,3 +665,21 @@ VALUES (
     )
 
 SELECT * from "Order"
+
+
+-- 1. Індекс для таблиці Drug по колонці Name
+CREATE INDEX idx_drug_name ON Drug (Name);
+
+-- 2. Індекс для таблиці Order по колонці Client_ID
+CREATE INDEX idx_order_client_id ON "Order" (Client_ID);
+
+-- 3. Комбінований індекс для таблиці Order по колонках Order_Date та Total_cost
+CREATE INDEX idx_order_date_cost ON "Order" (Order_Date, Total_cost);
+
+SELECT
+    SEGMENT_NAME AS Index_Name,
+    BYTES / 1024 AS Size_KB
+FROM USER_SEGMENTS
+WHERE
+    SEGMENT_NAME = 'IDX_DRUG_NAME';
+
